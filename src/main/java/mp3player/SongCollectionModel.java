@@ -6,14 +6,19 @@ import org.jaudiotagger.audio.*;
 import org.jaudiotagger.audio.exceptions.*;
 import org.jaudiotagger.tag.*;
 import java.io.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 /** The class that stores the songs, it's the "model" in this example.
  * Implements the Subject interface so that it can have observers. */
-public class SongCollectionModel  { // TODO: implement the Subject interface
+public class SongCollectionModel implements Subject{ // TODO: implement the Subject interface
     private List<Song> songs;
     // TODO: add observers and methods to add an observer and notify observers
+    private List<Observer> observers = new ArrayList<>();
     private PlayerThread currThread = new PlayerThread("");	// the current thread that is playing the song
 
     public SongCollectionModel() {
@@ -71,8 +76,17 @@ public class SongCollectionModel  { // TODO: implement the Subject interface
         // Open a directory stream for a given directory, find all mp3 files
         // and for each mp3 file, create a Song object using the createSongFromFile method,
         // and add a song to the list
-
-
+        try(DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(dir), "*.mp3")) {
+            for(Path entry: stream){
+                Song song = createSongFromFile(entry.toString());
+                if(song != null){
+                    songs.add(song);
+                }
+            }
+            notifyObservers();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /** Play the song with the
@@ -85,13 +99,32 @@ public class SongCollectionModel  { // TODO: implement the Subject interface
         // currThread should be pointed to a new PlayerThread with the corresponding mp3 filename
         // and started.
         // FILL IN CODE:
-
+        if (currThread != null && currThread.isAlive()) {
+            currThread.stopPlay();
+        }
+        Song song = getSongByIndex(ind);
+        currThread = new PlayerThread(song.getFilename());
+        currThread.start();
     }
 
     public void stop() {
         // FILL IN CODE:
         // If the current player thread is alive, you should stop it.
+        if (currThread != null && currThread.isAlive()) {
+            currThread.stopPlay();
+        }
+    }
 
+    @Override
+    public void registerObserver(Observer o) {
+        observers.add(o);
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (Observer o : observers) {
+            o.update();
+        }
     }
 
     /** A helper class for playing the song */

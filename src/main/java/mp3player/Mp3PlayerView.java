@@ -9,7 +9,9 @@ import java.io.File;
 
 /** View in the MVC pattern. Provides a GUI (Graphical User interface) for the mp3 player.
  *  Implements Observer (observes the model). */
-public class Mp3PlayerView extends JPanel  { // TODO: implement Observer
+public class Mp3PlayerView extends JPanel implements Observer{
+	private final SongCollectionModel model; // TODO: implement Observer
+	private final Controller controller;
 	// View should be the observer of the model: must implement update()
 	// Add instance variables: references to the controller and the model
 
@@ -22,6 +24,9 @@ public class Mp3PlayerView extends JPanel  { // TODO: implement Observer
 	public Mp3PlayerView(SongCollectionModel model, Controller controller) {
 		// FILL IN CODE: initialize the model and the controller, and register this
 		// class with the model as an observer
+		this.model = model;
+		this.controller = controller;
+		model.registerObserver(this);
 
 		// The code below is for generating GUI elements, no need to change
 		this.setLayout(new BorderLayout());
@@ -66,8 +71,9 @@ public class Mp3PlayerView extends JPanel  { // TODO: implement Observer
 
 		for (int i = 0; i < numSongs; i++) {
 			// get the song with index i from the model
-			tableElems[i][0] = ""; // get the title of the song with index i from the model
-			tableElems[i][1] = ""; // get the artist's name of the song with index i from the model
+			Song song = model.getSongByIndex(i);
+			tableElems[i][0] = song.getSongName(); // get the title of the song with index i from the model
+			tableElems[i][1] = song.getSongArtist(); // get the artist's name of the song with index i from the model
 		}
 
 		// Each row of tableElems must contain the title and the artist of a song
@@ -77,6 +83,11 @@ public class Mp3PlayerView extends JPanel  { // TODO: implement Observer
 		// the code below will add the table to the centerPanel
 		table = new JTable(tableElems, columnNames);
 		centerPanel.getViewport().add(table);
+	}
+
+	@Override
+	public void update() {
+		displaySongs();
 	}
 
 
@@ -94,7 +105,7 @@ public class Mp3PlayerView extends JPanel  { // TODO: implement Observer
 				String dir = getDirectoryWithMp3Music();
 				// FILL IN CODE: "tell" the controller that the user selected the directory with music
 				// (the controller will then call the corresponding method of the model that will load the songs to the model)
-
+				controller.load(dir);
 			}
 			else if (e.getSource() == playButton) { // user pressed "Play"
 				if (table == null)
@@ -102,10 +113,11 @@ public class Mp3PlayerView extends JPanel  { // TODO: implement Observer
 				int songIndex = table.getSelectedRow(); // this is the index of the song the user selected
 				// FILL IN CODE: "tell" the controller that the user selected a song, and pass the song id.
 				// The controller will then ask the model to play it
-
+				controller.songSelected(songIndex);
 			} else if (e.getSource() == stopButton) {
 				// FILL IN CODE: tell the controller that the user wants to stop
 				// playing the song
+				controller.stopSong();
 			} else if (e.getSource() == exitButton) {
 				System.exit(-1);
 			}
