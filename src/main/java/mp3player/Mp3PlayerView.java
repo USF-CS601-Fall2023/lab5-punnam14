@@ -65,7 +65,7 @@ public class Mp3PlayerView extends JPanel implements Observer{
 	 * Invoked in the update() method
 	 */
 	public void displaySongs() {
-		int numSongs = 0;// TODO: get the number of songs from the model
+		int numSongs = model.getNumSongs();// TODO: get the number of songs from the model
 		String[][] tableElems = new String[numSongs][2]; // contains titles and artists for each song
 		String[] columnNames = {"Title", "Artist"};
 
@@ -83,6 +83,11 @@ public class Mp3PlayerView extends JPanel implements Observer{
 		// the code below will add the table to the centerPanel
 		table = new JTable(tableElems, columnNames);
 		centerPanel.getViewport().add(table);
+		for(int i  = 0; i < tableElems.length; i++){
+			for(int j = 0; j < tableElems.length; j++){
+				System.out.println("printing table: " +tableElems[i][j]);
+			}
+		}
 	}
 
 	@Override

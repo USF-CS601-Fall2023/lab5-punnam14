@@ -99,7 +99,7 @@ public class SongCollectionModel implements Subject{ // TODO: implement the Subj
         // currThread should be pointed to a new PlayerThread with the corresponding mp3 filename
         // and started.
         // FILL IN CODE:
-        if (currThread != null && currThread.isAlive()) {
+        if (currThread.isAlive()) {
             currThread.stopPlay();
         }
         Song song = getSongByIndex(ind);
@@ -110,7 +110,7 @@ public class SongCollectionModel implements Subject{ // TODO: implement the Subj
     public void stop() {
         // FILL IN CODE:
         // If the current player thread is alive, you should stop it.
-        if (currThread != null && currThread.isAlive()) {
+        if (currThread.isAlive()) {
             currThread.stopPlay();
         }
     }
